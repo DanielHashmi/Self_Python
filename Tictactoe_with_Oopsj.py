@@ -1,6 +1,7 @@
 class Board:
     def __init__(self, turn):
         self.turn = turn
+        self.steps = 0
         self.board = [[0, 1, 2],
                       [3, 4, 5],
                       [6, 7, 8]]
@@ -8,7 +9,6 @@ class Board:
     def print_board(self):
         for row in self.board:
             print(f"{row[0]} | {row[1]} | {row[2]}")
-        print()
         
     def set_player_pos(self, pos):
         pos = int(pos)
@@ -17,10 +17,13 @@ class Board:
         
         if isinstance(self.board[row][col], int):
             self.board[row][col] = self.turn
-        else:
-            print("Position already taken!")
+            self.steps += 1
+            return True
         
-    def check_winner(self, symbol):
+        print("Position already taken!")
+        return False
+        
+    def check_winner(self, symbol):        
         # Rows
         for row in self.board:
             if symbol == row[0] == row[1] == row[2]:
@@ -50,17 +53,30 @@ class Game:
         board = Board(playerX.symbol)
         
         while True:
-            pos = input(f"Enter a position for player{board.turn}: ")
-            board.set_player_pos(pos)
-            board.print_board()
-            winner = board.check_winner(board.turn)
-            if winner:
-                print(f"The winner is: {winner}")
-                break
-            if board.turn == playerX.symbol:
-                board.turn = playerO.symbol
-            else:
-                board.turn = playerX.symbol
+            try:
+                board.print_board()
+                pos = input(f"Enter a position for player{board.turn}: ")
+                is_pos_set = board.set_player_pos(pos)
+                winner = board.check_winner(board.turn)
+                if winner:
+                    board.print_board()
+                    print(f"The winner is: {winner}")
+                    break
+                
+                if not winner and board.steps == 9:
+                    board.print_board()
+                    print("Tie!")
+                    break
+                
+                if is_pos_set:
+                    if board.turn == playerX.symbol:
+                        board.turn = playerO.symbol
+                    else:
+                        board.turn = playerX.symbol
+            except ValueError:
+                print("Kindly enter a Number!")
+            except Exception as e:
+                print(e)
                 
 def main():
     game = Game()
